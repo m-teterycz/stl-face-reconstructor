@@ -42,6 +42,7 @@ class Triangle:
             a[0]*b[1] - a[1]*b[0]
         ]
 
+
     def normalize(self, vector):
         x = vector[0]
         y = vector[1]
