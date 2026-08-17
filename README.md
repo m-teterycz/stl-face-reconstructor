@@ -16,10 +16,10 @@ Rather than relying on existing CAD libraries, the project aims to implement the
 * Internal triangle representation
 * Binary STL parsing
 * Coplanar face detection
-* 
+* Face outer edge detection
+  
 ## Planned Features
 
-* Face boundary reconstruction
 * STEP export (experimental)
 * Optional GUI
 * Optional machine-learning based mesh analysis
