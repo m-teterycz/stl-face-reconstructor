@@ -19,7 +19,7 @@ class StepWriter: # WIP
         f.write("ENDSEC;\n\n")
         f.write("DATA;\n\n")
         """
-        Writes basic structure of step file with some empty lines inbetween:
+        Writes basic structure of step file
 
         HEADER;
         FILE_DESCRIPTION(...);
@@ -28,9 +28,9 @@ class StepWriter: # WIP
         ENDSEC;
         """
 
-    def entity_number_mapper(self): # WIP
+    def entity_number_mapper(self, faces): # WIP
         eNumtoVertex = {}
 
-        for face in self.co_planar_groups:
+        for face in faces:
             for triangle in face:
                 pass

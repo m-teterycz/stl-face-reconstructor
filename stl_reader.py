@@ -1,4 +1,4 @@
-import math, struct
+import struct
 
 def stl_type(data):
     if 'vertex' in data:

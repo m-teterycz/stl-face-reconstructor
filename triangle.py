@@ -14,8 +14,16 @@ class Triangle:
 
         self.vertices = temp_vert
 
-        self.edge1 = self.vector(self.vertices[0], self.vertices[1])
-        self.edge2 = self.vector(self.vertices[0], self.vertices[2])
+        if self.vertices[0] < self.vertices[1]: # Orders all vertices to allow for easy duplicate edge detection later in faces.py
+            self.edge1 = self.vector(self.vertices[0], self.vertices[1])
+        else:
+            self.edge1 = self.vector(self.vertices[1], self.vertices[0])
+
+        if self.vertices[0] < self.vertices[2]:
+            self.edge2 = self.vector(self.vertices[0], self.vertices[2])
+        else:
+            self.edge2 = self.vector(self.vertices[2], self.vertices[0])
+
         self.normal = self.normalize(self.cross_product(self.edge1, self.edge2))
 
         self.get_edges()
@@ -48,7 +56,7 @@ class Triangle:
         y = y / length
         z = z / length
 
-        return [x, y, z]
+        return [abs(x), abs(y), abs(z)]
 
 
     def get_edges(self):
