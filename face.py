@@ -3,8 +3,10 @@ class Face:
         self.triangles = triangles
         self.vertices = []
         self.get_edges()
+        self.get_vertices()
+        self.normal = triangles[0].normal
 
-    def get_edges(self):
+    def get_edges(self): # Get outer edges from triangles and store them in self.edges
         self.edges = []
 
         for triangle in self.triangles:
@@ -22,3 +24,10 @@ class Face:
 
         for inner_edge in inner_edges:
             self.edges.remove(inner_edge)
+
+    def get_vertices(self): # Get unique vertices from edges and store them in self.vertices
+        for edge in self.edges:
+            if edge[0] not in self.vertices:
+                self.vertices.append(edge[0])
+            if edge[1] not in self.vertices:
+                self.vertices.append(edge[1])

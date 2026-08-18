@@ -1,4 +1,4 @@
-import math
+import math, geometry_math
 
 class Triangle:
     def __init__(self, vertices):
@@ -12,53 +12,14 @@ class Triangle:
         for vertex in self.vertices:
             temp_vert.append([float(vertex[0]), float(vertex[1]), float(vertex[2])])
 
-        self.vertices = temp_vert
+        self.vertices = tuple(temp_vert)
 
-        if self.vertices[0] < self.vertices[1]: # Orders all vertices to allow for easy duplicate edge detection later in faces.py
-            self.edge1 = self.vector(self.vertices[0], self.vertices[1])
-        else:
-            self.edge1 = self.vector(self.vertices[1], self.vertices[0])
-
-        if self.vertices[0] < self.vertices[2]:
-            self.edge2 = self.vector(self.vertices[0], self.vertices[2])
-        else:
-            self.edge2 = self.vector(self.vertices[2], self.vertices[0])
-
-        self.normal = self.normalize(self.cross_product(self.edge1, self.edge2))
+        self.edge1 = geometry_math.vector(self.vertices[0], self.vertices[1])
+        self.edge2 = geometry_math.vector(self.vertices[0], self.vertices[2])
+        self.normal = geometry_math.normalize(geometry_math.cross_product(self.edge1, self.edge2))
+        self.small_large_vertex()
 
         self.get_edges()
-
-    def vector(self, v1, v2):
-        return [
-            v2[0] - v1[0],
-            v2[1] - v1[1],
-            v2[2] - v1[2]
-        ]
-
-    def cross_product(self, a, b):
-        return [
-            a[1]*b[2] - a[2]*b[1],
-            a[2]*b[0] - a[0]*b[2],
-            a[0]*b[1] - a[1]*b[0]
-        ]
-
-
-    def normalize(self, vector):
-        x = vector[0]
-        y = vector[1]
-        z = vector[2]
-
-        length = math.sqrt(x*x + y*y + z*z)
-
-        if length == 0:
-            return [0, 0, 0]
-
-        x = x / length
-        y = y / length
-        z = z / length
-
-        return [abs(x), abs(y), abs(z)]
-
 
     def get_edges(self):
         for i in range(3):
@@ -68,6 +29,18 @@ class Triangle:
                 else:
                     self.edges.append([self.vertices[j],self.vertices[i]])
 
+    def small_large_vertex(self): # Orders all vertices to allow for easy duplicate edge detection later in faces.py
+            if self.vertices[0] < self.vertices[1]:
+                self.edge1 = geometry_math.vector(self.vertices[0], self.vertices[1])
+            else:
+                self.edge1 = geometry_math.vector(self.vertices[1], self.vertices[0])
+            
+            if self.vertices[0] < self.vertices[2]:
+                self.edge2 = geometry_math.vector(self.vertices[0], self.vertices[2])
+            else:
+                self.edge2 = geometry_math.vector(self.vertices[2], self.vertices[0])
+
+
 def create_triangles(data):
     triangles = []
     
@@ -76,3 +49,5 @@ def create_triangles(data):
         triangles.append(triangle)
 
     return triangles
+
+    

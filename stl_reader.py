@@ -13,7 +13,6 @@ def read_data(path):
             return format_data_binary(path)
 
 def format_data_ascii(path):
-    print('ascii mode')
     
     f = open(path, 'r')
     data = f.read()
