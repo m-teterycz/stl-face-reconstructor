@@ -1,4 +1,4 @@
-import math, geometry_math
+import geometry_math
 
 class Triangle:
     def __init__(self, vertices):
@@ -6,7 +6,6 @@ class Triangle:
         self.vertices = vertices
         self.neighbours = []
         self.edges = []
-
         temp_vert = []
             
         for vertex in self.vertices:
@@ -49,5 +48,3 @@ def create_triangles(data):
         triangles.append(triangle)
 
     return triangles
-
-    

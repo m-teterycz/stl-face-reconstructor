@@ -2,6 +2,7 @@ class Mesh:
     def __init__(self, triangles):
         self.triangles = triangles
         self.faces = []
+        self.vertices = self.get_vertices()
     
     def find_neighbours(self):
         for i in range(len(self.triangles)):
@@ -53,3 +54,11 @@ class Mesh:
                     stack.append(neighbour)
 
         return planarfaces
+
+    def get_vertices(self):
+        vertices = []
+        for triangle in self.triangles:
+            for vertex in triangle.vertices:
+                if vertex not in vertices:
+                    vertices.append(vertex)
+        return vertices

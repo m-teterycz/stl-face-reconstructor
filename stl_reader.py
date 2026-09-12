@@ -68,5 +68,3 @@ def coords_check(coords):
         except:
             return False
     return True
-      
-        
