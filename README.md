@@ -37,7 +37,13 @@ STL files contain only triangle meshes and lose most of the topology information
 
 ## Project Status
 
-This project is currently in the early development stage. The parser is being expanded to support a wider range of ASCII STL files and binary STL detection.
+This project is currently in the early development stage. The parser is currently being worked on so that the parsed STL file can be written in STEP format.
+The current supported types of geometry in STEP that can be written are:
+
+* Cartesian Points
+* Vertex Points
+* Lines
+* Directions
 
 ## License
 
