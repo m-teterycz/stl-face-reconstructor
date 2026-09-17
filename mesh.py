@@ -61,4 +61,4 @@ class Mesh:
             for vertex in triangle.vertices:
                 if vertex not in vertices:
                     vertices.append(vertex)
-        return vertices
+        return tuple(vertices)

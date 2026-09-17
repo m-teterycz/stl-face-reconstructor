@@ -10,7 +10,14 @@ class StepWriter:
         self.faces = mesh.faces
         self.triangles = mesh.triangles
         self.current_id = 0
-        self.registry = []
+        self.registry = [] # Used to write in chronological order
+
+        self.cartesian_registry = {}  # Use these to map a feature e.g coord into its id. 
+        self.vertex_registry = {}     
+        self.edge_registry = {}
+        self.direction_registry = {}
+        self.line_registry = {}      
+
         
 
     def write_data(self, f):
@@ -54,9 +61,9 @@ class CartesianPoint(StepEntity):
         return f"#{self.id} = CARTESIAN_POINT('', {self.coordinates});\n"
 
 class Direction(StepEntity):
-    def __init__(self, edges):
+    def __init__(self, edge):
         super().__init__("Direction")
-        self.vector = geometry_math.vector(edges[0], edges[1])
+        self.vector = geometry_math.vector(edge[0], edge[1])
         self.vector = geometry_math.normalize(self.vector)
 
     def get_step_string(self):
@@ -71,9 +78,10 @@ class VertexPoint(StepEntity):
         return f"#{self.id} = VERTEX_POINT('', {self.coordinates});\n"
 
 class Line(StepEntity):
-    def __init__(self, vertex):
+    def __init__(self, coords, direction):
             super().__init__("Line")
-            self.coordinates = vertex
+            self.coordinates = coords
+            self.direction = direction
     
     def get_step_string(self):
-        return f"#{self.id} = Line('', {self.coordinates});\n"
+        return f"#{self.id} = Line('', {self.coordinates}, {self.direction});\n"

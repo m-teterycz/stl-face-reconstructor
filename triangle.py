@@ -7,9 +7,9 @@ class Triangle:
         self.neighbours = []
         self.edges = []
         temp_vert = []
-            
+
         for vertex in self.vertices:
-            temp_vert.append([float(vertex[0]), float(vertex[1]), float(vertex[2])])
+            temp_vert.append((float(vertex[0]), float(vertex[1]), float(vertex[2])))
 
         self.vertices = tuple(temp_vert)
 
@@ -24,9 +24,11 @@ class Triangle:
         for i in range(3):
             for j in range(i + 1, 3):
                 if self.vertices[i] < self.vertices[j]:
-                    self.edges.append([self.vertices[i],self.vertices[j]])
+                    self.edges.append((self.vertices[i],self.vertices[j]))
                 else:
-                    self.edges.append([self.vertices[j],self.vertices[i]])
+                    self.edges.append((self.vertices[j],self.vertices[i]))
+
+        self.edges = tuple(self.edges)
 
     def small_large_vertex(self): # Orders all vertices to allow for easy duplicate edge detection later in faces.py
             if self.vertices[0] < self.vertices[1]:
@@ -44,7 +46,7 @@ def create_triangles(data):
     triangles = []
     
     for i in range(0, len(data), 3):
-        triangle = Triangle(data[i:i + 3])
+        triangle = Triangle(tuple(data[i:i + 3]))
         triangles.append(triangle)
 
     return triangles

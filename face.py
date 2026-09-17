@@ -26,6 +26,8 @@ class Face:
         for inner_edge in inner_edges:
             self.edges.remove(inner_edge)
 
+        self.edges = tuple(self.edges)
+
     def get_vertices(self): # Get unique vertices from edges and store them in self.vertices
         for edge in self.edges:
             if edge[0] not in self.vertices:
