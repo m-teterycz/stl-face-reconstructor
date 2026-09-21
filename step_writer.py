@@ -16,7 +16,11 @@ class StepWriter:
         self.vertex_registry = {}     
         self.edge_registry = {}
         self.direction_registry = {}
-        self.line_registry = {}      
+        self.line_registry = {}
+        self.vector_registry = {}      
+        self.edgecurve_registry = {}
+        self.orientededge_registry = {}
+        self.edgeloop_registry = {}    
 
         
 
@@ -79,9 +83,50 @@ class VertexPoint(StepEntity):
 
 class Line(StepEntity):
     def __init__(self, coords, direction):
-            super().__init__("Line")
+            super().__init__("LINE")
             self.coordinates = coords
             self.direction = direction
     
     def get_step_string(self):
-        return f"#{self.id} = Line('', {self.coordinates}, {self.direction});\n"
+        return f"#{self.id} = LINE('', {self.coordinates}, {self.direction});\n"
+
+
+class Vector(StepEntity):
+    def __init__(self,direction, magnitude):
+            super().__init__("VECTOR")
+            self.magnitude = magnitude
+            self.direction = direction
+    
+    def get_step_string(self):
+        return f"#{self.id} = VECTOR('', #{self.direction}, {self.magnitude});\n"
+
+class EdgeCurve(StepEntity):
+    def __init__(self, start_v, end_v, curve):
+            super().__init__("EDGE_CURVE")
+            self.start_v = start_v
+            self.end_v = end_v
+            self.curve = curve
+    
+    def get_step_string(self):
+        return f"#{self.id} = EDGE_CURVE('', #{self.start_v}, #{self.end_v}, #{self.curve}, .T.);\n"
+
+class OrientedEdge(StepEntity):
+    def __init__(self, curve):
+            super().__init__("ORIENTED_EDGE")
+            self.curve = curve
+    
+    def get_step_string(self):
+        return f"#{self.id} = ORIENTED_EDGE('', *, *, #{self.curve}, .T.);\n"
+
+class EdgeLoop(StepEntity):
+    def __init__(self, loop):
+            super().__init__("EDGE_LOOP")
+            self.loop = loop
+            for i in range(len(self.loop)):
+                 text = f"#{self.loop[i]}"
+                 self.loop[i] = text
+            self.loop = ", ".join(self.loop)
+
+    def get_step_string(self):
+        print(self.loop)
+        return f"#{self.id} = EDGE_LOOP('', ({self.loop}));\n"

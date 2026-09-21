@@ -29,3 +29,6 @@ def normalize(vector):
     z = z / length
 
     return [x, y, z]
+
+def magnitude(v):
+     return (v[0] ** 2 + v[1] ** 2 + v[2] ** 2) ** 0.5
