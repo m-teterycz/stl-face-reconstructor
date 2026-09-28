@@ -12,15 +12,18 @@ class StepWriter:
         self.current_id = 0
         self.registry = [] # Used to write in chronological order
 
-        self.cartesian_registry = {}  # Use these to map a feature e.g coord into its id. 
+        self.cartesian_registry = {}  # Use these to map a feature e.g coord into its id. _i means key and value pairs swapped around
         self.vertex_registry = {}     
         self.edge_registry = {}
         self.direction_registry = {}
         self.line_registry = {}
         self.vector_registry = {}      
         self.edgecurve_registry = {}
+        self.edgecurve_direction = {}
+        self.edgecurve_registry_i = {}
         self.orientededge_registry = {}
-        self.edgeloop_registry = {}    
+        self.edgeloop_registry = {}
+        self.faceouterbound_registry = {}      
 
         
 
@@ -49,7 +52,7 @@ class StepWriter:
         self.registry.append(entity)
 
         return entity
-
+         
 
 class StepEntity: # Generic Step Entity
     def __init__(self, name):
@@ -66,7 +69,7 @@ class CartesianPoint(StepEntity):
 
 class Direction(StepEntity):
     def __init__(self, edge):
-        super().__init__("Direction")
+        super().__init__("DIRECTION")
         self.vector = geometry_math.vector(edge[0], edge[1])
         self.vector = geometry_math.normalize(self.vector)
 
@@ -111,12 +114,13 @@ class EdgeCurve(StepEntity):
         return f"#{self.id} = EDGE_CURVE('', #{self.start_v}, #{self.end_v}, #{self.curve}, .T.);\n"
 
 class OrientedEdge(StepEntity):
-    def __init__(self, curve):
+    def __init__(self, curve, ending):
             super().__init__("ORIENTED_EDGE")
             self.curve = curve
+            self.ending = ending
     
     def get_step_string(self):
-        return f"#{self.id} = ORIENTED_EDGE('', *, *, #{self.curve}, .T.);\n"
+        return f"#{self.id} = ORIENTED_EDGE('', *, *, #{self.curve}, {self.ending});\n"
 
 class EdgeLoop(StepEntity):
     def __init__(self, loop):
@@ -128,5 +132,12 @@ class EdgeLoop(StepEntity):
             self.loop = ", ".join(self.loop)
 
     def get_step_string(self):
-        print(self.loop)
         return f"#{self.id} = EDGE_LOOP('', ({self.loop}));\n"
+
+class FaceOuterBound(StepEntity):
+    def __init__(self, prev_id):
+            super().__init__("FACE_OUTER_BOUND")
+            self.prev_id = prev_id
+
+    def get_step_string(self):
+        return f"#{self.id} = FACE_OUTER_BOUND('', #{self.prev_id}, .T.);\n"

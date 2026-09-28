@@ -3,7 +3,7 @@ from mesh import Mesh
 import triangle
 from step_writer import StepWriter
 from face import Face
-from step_writer import CartesianPoint, Direction, VertexPoint, Line, Vector, EdgeCurve, OrientedEdge, EdgeLoop
+from step_writer import CartesianPoint, Direction, VertexPoint, Line, Vector, EdgeCurve, OrientedEdge, EdgeLoop, FaceOuterBound
 import geometry_math
 
 
@@ -20,7 +20,6 @@ for i in range(len(co_planar_groups)):
     mesh.faces.append(face)
 
 stepwriter = StepWriter(mesh)
-
 for vertex in mesh.vertices: # Register all unique vertices in the mesh to the step file
     Cartesian_Point = CartesianPoint(vertex)
     stepwriter.register(Cartesian_Point) # Generates an id
@@ -30,32 +29,54 @@ for vertex in mesh.vertices: # Register all unique vertices in the mesh to the s
     stepwriter.register(Vertex_Point)
     stepwriter.vertex_registry[vertex] = Vertex_Point.id
 
-for edge in face.edges: # Add lines, directions and vectors.
-    magnitude = geometry_math.magnitude(geometry_math.vector(edge[0], edge[1]))
+for face in mesh.faces:
+    OrientedEdges = []
+    for edge in face.edges: # Add lines, directions and vectors.
+        magnitude = geometry_math.magnitude(geometry_math.vector(edge[0], edge[1]))
+        
+        data = frozenset(edge)
+        if data not in stepwriter.direction_registry:
+            Direction1 = Direction(edge)
+            stepwriter.register(Direction1)
+            stepwriter.direction_registry[data] = Direction1.id
 
-    Direction1 = Direction(edge)
-    stepwriter.register(Direction1)
-    stepwriter.direction_registry[Direction1] = Direction1.id
+            Vector1 = Vector(Direction1.id, magnitude)
+            stepwriter.register(Vector1)
+            stepwriter.vector_registry[Vector1] = Vector1.id
 
-    Vector1 = Vector(Direction1.id, magnitude)
-    stepwriter.register(Vector1)
-    stepwriter.vector_registry[Vector1] = Vector1.id
+            Line1 = Line(f"#{stepwriter.cartesian_registry[edge[0]]}", f"#{stepwriter.current_id}")
+            stepwriter.register(Line1)
+            stepwriter.line_registry[Line1] = Line1.id
 
-    Line1 = Line(f"#{stepwriter.cartesian_registry[edge[0]]}", f"#{stepwriter.current_id}")
-    stepwriter.register(Line1)
-    stepwriter.line_registry[Line1] = Line1.id
+        data = frozenset((stepwriter.vertex_registry[edge[0]], stepwriter.vertex_registry[edge[1]]))
+        if data not in stepwriter.edgecurve_registry:
+            EdgeCurve1 = EdgeCurve(stepwriter.vertex_registry[edge[0]], stepwriter.vertex_registry[edge[1]], Line1.id)
+            stepwriter.register(EdgeCurve1)
+            stepwriter.edgecurve_registry[data] = EdgeCurve1.id
+            stepwriter.edgecurve_direction[data] = (edge[0], edge[1])
+            stepwriter.edgecurve_registry_i[EdgeCurve1.id] = data
 
-    EdgeCurve1 = EdgeCurve(stepwriter.vertex_registry[edge[0]], stepwriter.vertex_registry[edge[1]], Line1.id)
-    stepwriter.register(EdgeCurve1)
-    stepwriter.edgecurve_registry[EdgeCurve1] = EdgeCurve1.id
 
-    OrientedEdge1 = OrientedEdge(EdgeCurve1.id)#
-    stepwriter.register(OrientedEdge1)
-    stepwriter.orientededge_registry[OrientedEdge1] = OrientedEdge1.id
+        EdgeCurveid = stepwriter.edgecurve_registry[data]
+        original_edge = stepwriter.edgecurve_direction[data]
 
-EdgeLoop1 = EdgeLoop(list(stepwriter.orientededge_registry.values()))
-stepwriter.register(EdgeLoop1)
-stepwriter.orientededge_registry[EdgeLoop1] = EdgeLoop1.id
+        if original_edge == (edge[0], edge[1]):
+            ending = ".T."
+        else:
+            ending = ".F."
+        OrientedEdge1 = OrientedEdge(EdgeCurveid, ending)
+        stepwriter.register(OrientedEdge1)
+        stepwriter.orientededge_registry[OrientedEdge1] = OrientedEdge1.id 
+
+        OrientedEdges.append(OrientedEdge1.id)     
+            
+    EdgeLoop1 =  EdgeLoop(OrientedEdges)
+    stepwriter.register(EdgeLoop1)
+    stepwriter.edgeloop_registry[EdgeLoop1] = EdgeLoop1.id
+
+    FaceOuterBound1 = FaceOuterBound(EdgeLoop1.id)
+    stepwriter.register(FaceOuterBound1)
+    stepwriter.faceouterbound_registry[FaceOuterBound1] = FaceOuterBound1.id
 
 
 stepwriter.write_data(open("OUTPUT.step", "w"))
