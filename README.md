@@ -1,6 +1,6 @@
 # STL Face Reconstructor
 
-Experimental Python implementation of ASCII and binary STL parsing with planar face reconstruction for future STEP conversion.
+Experimental Python implementation of ASCII and binary STL parsing with planar face reconstruction for STEP conversion.
 
 ## Overview
 
@@ -22,7 +22,7 @@ Rather than relying on existing CAD libraries, the project aims to implement the
 
 * STEP export (experimental)
 * Optional GUI
-* Optional machine-learning based mesh analysis
+* Rounding values in actual STL files to prevent co-planar detection from failing
 
 ## Why This Project?
 
@@ -37,13 +37,23 @@ STL files contain only triangle meshes and lose most of the topology information
 
 ## Project Status
 
-This project is currently in the early development stage. The parser is currently being worked on so that the parsed STL file can be written in STEP format.
+This project is currently in the early late development stage. The parser is currently being worked on so that the parsed STL file can be written in STEP format. (Closed to being finished.)
 The current supported types of geometry in STEP that can be written are:
 
-* Cartesian Points
-* Vertex Points
-* Lines
-* Directions
+* CARTESIAN_POINT
+* VERTEX_POINT
+* DIRECTION
+* VECTOR
+* LINE
+* EDGE_CURVE
+* ORIENTED_EDGE
+* EDGE_LOOP
+* FACE_OUTER_BOUND
+* AXIS2_PLACEMENT_3D
+* PLANE
+* ADVANCED_FACE
+* CLOSED_SHELL
+* MANIFOLD_SOLID_BREP
 
 ## License
 
