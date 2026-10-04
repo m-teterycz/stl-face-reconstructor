@@ -15,7 +15,7 @@ class Triangle:
 
         self.edge1 = geometry_math.vector(self.vertices[0], self.vertices[1])
         self.edge2 = geometry_math.vector(self.vertices[0], self.vertices[2])
-        self.normal = geometry_math.normalize(geometry_math.cross_product(self.edge1, self.edge2))
+        self.normal = tuple(geometry_math.normalize(geometry_math.cross_product(self.edge1, self.edge2)))
         self.small_large_vertex()
 
         self.get_edges()

@@ -1,11 +1,13 @@
+import geometry_math
+
 class Face:
     def __init__(self, triangles):
         self.triangles = triangles
+        self.normal = triangles[0].normal
         self.vertices = []
         self.get_edges()
         self.order_edges()
         self.get_vertices()
-        self.normal = triangles[0].normal
 
     def get_edges(self): # Get outer edges from triangles and store them in self.edges
         self.edges = []
@@ -37,7 +39,7 @@ class Face:
 
 
     
-    def order_edges(self): # WIP Needed so that in the STEP writer a closed loop can be created
+    def order_edges(self):
         self.original_length = len(self.edges)
         self.current_edge = self.edges[0]
         self.ordered_edges = [self.edges[0]]
@@ -56,5 +58,17 @@ class Face:
                     self.used_edges.append(self.current_edge)
                     break
 
-        self.edges = self.ordered_edges        
+
+        v1 = geometry_math.vector(self.ordered_edges[0][0], self.ordered_edges[0][1])
+        v2 = geometry_math.vector(self.ordered_edges[1][0], self.ordered_edges[1][1])
+        normal = tuple(geometry_math.normalize(geometry_math.cross_product(v1, v2)))
+        dot = geometry_math.dot(normal, self.normal)
+
+        if dot < 0:
+            self.ordered_edges.reverse()
+            for i,edge in enumerate(self.ordered_edges):
+                self.ordered_edges[i] = edge[::-1]
+                
+        self.edges = self.ordered_edges
+        
     
