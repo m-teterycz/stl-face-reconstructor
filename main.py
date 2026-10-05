@@ -7,7 +7,7 @@ from step_writer import CartesianPoint, Direction, VertexPoint, Line, Vector, Ed
 import geometry_math
 
 
-data = stl_reader.read_data('cube.stl')
+data = stl_reader.read_data('square_pyramid.stl')
 triangles = triangle.create_triangles(data)
 
 mesh = Mesh(triangles)
