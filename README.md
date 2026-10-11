@@ -17,7 +17,7 @@ Rather than relying on existing CAD libraries, the project aims to implement the
 * Binary STL parsing
 * Coplanar face detection
 * Face outer edge detection
-* STEP export (only works for flat faced models)
+* STEP export (mostly works for regular geometry with no curves etc. There might be edge cases.)
 ## Planned Features
 
 * Optional GUI
