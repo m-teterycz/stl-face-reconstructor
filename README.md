@@ -17,10 +17,9 @@ Rather than relying on existing CAD libraries, the project aims to implement the
 * Binary STL parsing
 * Coplanar face detection
 * Face outer edge detection
-  
+* STEP export (only works for flat faced models)
 ## Planned Features
 
-* STEP export (experimental)
 * Optional GUI
 * Rounding values in actual STL files to prevent co-planar detection from failing
 
@@ -54,6 +53,21 @@ The current supported types of geometry in STEP that can be written are:
 * ADVANCED_FACE
 * CLOSED_SHELL
 * MANIFOLD_SOLID_BREP
+* APPLICATION_CONTEXT
+* APPLICATION_PROTOCOL_DEFINITION
+* PRODUCT_CONTEXT
+* PRODUCT
+* PRODUCT_DEFINITION_FORMATION
+* PRODUCT_DEFINITION_CONTEXT
+* PRODUCT_DEFINITION
+* PRODUCT_DEFINITION_SHAPE
+* LENGTH_UNIT
+* PLANE_ANGLE_UNIT
+* SOLID_ANGLE_UNIT
+* UNCERTAINTY_MEASURE_WITH_UNIT
+* GEOMETRIC_REPRESENTATION_CONTEXT
+* ADVANCED_BREP_SHAPE_REPRESENTATION
+* SHAPE_DEFINITION_REPRESENTATION
 
 ## License
 
