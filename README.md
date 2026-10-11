@@ -47,6 +47,7 @@ The current supported types of geometry in STEP that can be written are:
 * EDGE_CURVE
 * ORIENTED_EDGE
 * EDGE_LOOP
+* FACE_BOUND
 * FACE_OUTER_BOUND
 * AXIS2_PLACEMENT_3D
 * PLANE
