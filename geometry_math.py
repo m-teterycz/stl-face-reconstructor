@@ -39,3 +39,9 @@ def dot(v1, v2):
      z = v1[2] * v2[2]
 
      return x + y + z
+
+def vector_scalar(v1, scalar):
+     return [v1[0] * scalar, v1[1] * scalar, v1[2] * scalar]
+
+def vector_subtraction(v1, v2):
+     return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]]

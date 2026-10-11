@@ -1,6 +1,6 @@
 import geometry_math
 class StepWriter:
-    def __init__(self, mesh):
+    def __init__(self, mesh, measurments, name, description):
         self.name = "YourName"
         self.application_name = "AppName"
         self.application = "YourApplication"
@@ -28,13 +28,64 @@ class StepWriter:
         self.normal_registry = {} 
         self.Axis2_Placement_3D_registry = {}
         self.plane_registry = {}
+        self.manifoldsolidbrep = {}
+        self.facebound_registry = {}
+        self.advancedface_registry = {}
 
+        self.measurments = measurments
+        self.name = name
+        self.description = description
 
     def build_product_structure(self):
-        pass
+        global ProductDefShape
+
+        AppContext = ApplicationContext('Managed model based 3d engineering')
+        self.register(AppContext)
+
+        AppProtocolDef = ApplicationProtocolDefinition('international standard', 'ap242_managed_model_based_3d_engineering', 2013, AppContext.id)
+        self.register(AppProtocolDef)
+
+        ProductContext1 = ProductContext('', AppContext.id, "mechanical")
+        self.register(ProductContext1)
+
+        Product1 = Product(self.name, self.name, self.description, ProductContext1.id)
+        self.register(Product1)
+
+        ProductDefFormation = ProductDefinitionFormation('', '', Product1.id)
+        self.register(ProductDefFormation)
+
+        ProductDefContext = ProductDefinitionContext('part definition', AppContext.id, 'design')
+        self.register(ProductDefContext)
+
+        ProductDef = ProductDefinition('design', '', ProductDefFormation.id, ProductDefContext.id)
+        self.register(ProductDef)
+
+        ProductDefShape = ProductDefinitionShape('', '', ProductDef.id)
+        self.register(ProductDefShape)
+
 
     def build_representation_structure(self):
-        pass
+        LengthUnit1 = LengthUnit("MILLI", "METRE")
+        self.register(LengthUnit1)
+
+        PlaneAngleUnit1 = PlaneAngleUnit()
+        self.register(PlaneAngleUnit1)
+
+        SolidAngleUnit1 = SolidAngleUnit()
+        self.register(SolidAngleUnit1)
+
+        UncertaintyMeasureWithUnit1 = UncertaintyMeasureWithUnit(1.E-06, LengthUnit1.id, 'distance_accuracy_value', 'confusion accuracy')
+        self.register(UncertaintyMeasureWithUnit1)
+
+        GeometricRepresentationContext1 = GeometricRepresentationContext(UncertaintyMeasureWithUnit1.id, [LengthUnit1.id, PlaneAngleUnit1.id, SolidAngleUnit1.id])
+        self.register(GeometricRepresentationContext1)
+
+        AdvancedBrepShapeRepresentation1 = AdvancedBrepShapeRepresentation(self.name, list(self.manifoldsolidbrep.values())[0],GeometricRepresentationContext1.id)
+        self.register(AdvancedBrepShapeRepresentation1)
+
+        ShapeDefinitionRepresentation1 = ShapeDefinitionRepresentation(ProductDefShape.id, AdvancedBrepShapeRepresentation1.id)
+        self.register(ShapeDefinitionRepresentation1)
+
 
     def write_data(self, f):
         f.write('ISO-10303-21;\nHEADER;\n\n')
@@ -141,6 +192,14 @@ class EdgeLoop(StepEntity):
     def get_step_string(self):
         return f"#{self.id} = EDGE_LOOP('', ({self.loop}));\n"
 
+class FaceBound(StepEntity):
+    def __init__(self, prev_id):
+            super().__init__("FACE_BOUND")
+            self.prev_id = prev_id
+
+    def get_step_string(self):
+        return f"#{self.id} = FACE_BOUND('', #{self.prev_id}, .T.);\n"
+    
 class FaceOuterBound(StepEntity):
     def __init__(self, prev_id):
             super().__init__("FACE_OUTER_BOUND")
@@ -175,14 +234,16 @@ class Plane(StepEntity):
     def get_step_string(self):
         return f"#{self.id} = PLANE('', #{self.axis2});\n"
 
+
 class AdvancedFace(StepEntity):
-    def __init__(self, faceouterbound, plane):
+    def __init__(self, face_ids, plane):
         super().__init__("ADVANCED_FACE")
-        self.faceouterbound = faceouterbound
+        self.face_ids = face_ids
         self.plane = plane
 
     def get_step_string(self):
-        return f"#{self.id} = ADVANCED_FACE('', (#{self.faceouterbound}), #{self.plane}, .T.);\n"
+        face_ids_text = ", ".join(f"#{face_id}" for face_id in self.face_ids)
+        return (f"#{self.id} = ADVANCED_FACE('', "f"({face_ids_text}), #{self.plane}, .T.);\n")
 
 class ClosedShell(StepEntity):
     def __init__(self, advanced_faces):
@@ -207,12 +268,12 @@ class ManifoldSolidBrep(StepEntity):
         return f"#{self.id} = MANIFOLD_SOLID_BREP({"'"+self.name+"'"}, #{self.closed_shell});\n"
 
 class ApplicationContext(StepEntity):
-    def __init__(self, name, description):
+    def __init__(self, description):
         super().__init__("APPLICATION_CONTEXT")
         self.description = description
 
     def get_step_string(self):
-        return f"#{self.id} = APPLICATION_CONTEXT({self.description});\n"
+        return f"#{self.id} = APPLICATION_CONTEXT({"'"+self.description+"'"});\n"
 
 class ApplicationProtocolDefinition(StepEntity):
 
@@ -258,20 +319,13 @@ class Product(StepEntity):
         self.contexts = contexts
 
     def get_step_string(self):
-        contexts = ""
-
-        for i, x in enumerate(self.contexts):
-            if i > 0:
-                contexts += ", "
-
-            contexts += f"#{x}"
 
         return (
             f"#{self.id} = PRODUCT("
             f"'{self.id_string}', "
             f"'{self.name}', "
             f"'{self.description}', "
-            f"({contexts}));\n"
+            f"(#{self.contexts}));\n"
         )
 
 class ProductDefinitionFormation(StepEntity):
@@ -342,7 +396,7 @@ class ProductDefinitionShape(StepEntity):
 
 class LengthUnit(StepEntity):
 
-    def __init__(self, prefix="MILLI", unit="METRE"):
+    def __init__(self, prefix, unit):
         super().__init__("LENGTH_UNIT")
         self.prefix = prefix
         self.unit = unit
@@ -430,18 +484,11 @@ class AdvancedBrepShapeRepresentation(StepEntity):
         self.context = context
 
     def get_step_string(self):
-        items = ""
-
-        for i, x in enumerate(self.items):
-            if i > 0:
-                items += ", "
-
-            items += f"#{x}"
 
         return (
             f"#{self.id} = ADVANCED_BREP_SHAPE_REPRESENTATION("
             f"'{self.name}', "
-            f"({items}), "
+            f"(#{self.items}), "
             f"#{self.context});\n"
         )
 
