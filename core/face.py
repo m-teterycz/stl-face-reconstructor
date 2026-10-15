@@ -1,4 +1,4 @@
-import geometry_math
+from core import geometry_math
 
 class Face:
     def __init__(self, triangles):
@@ -13,20 +13,21 @@ class Face:
         self.outer_loop = self.get_outer_loop()
 
     def get_edges(self): # Get outer edges from triangles and store them in self.edges
-        self.edges = []
+        self.edges = set()
 
         for triangle in self.triangles:
             for edge in triangle.edges:
-                if edge not in self.edges:
-                    self.edges.append(edge)
+                if frozenset(edge) not in self.edges:
+                    self.edges.add(edge)
                     
-        seen = []
+        seen = set()
         inner_edges = []
         for triangle in self.triangles:
             for i in range(3):
-                if triangle.edges[i] in seen:
+                if frozenset(triangle.edges[i]) in seen:
                     inner_edges.append(triangle.edges[i])
-                seen.append(triangle.edges[i])
+                seen.add(frozenset(triangle.edges[i]))
+
 
         for inner_edge in inner_edges:
             self.edges.remove(inner_edge)
@@ -98,15 +99,19 @@ class Face:
         if len(self.loops) == 1:
             return None
         
-        # =============
-        # CHECK IN FUTURE IF THE POINTS ARE COLINEAR OTHERWISE IT CAN CAUSE ISSUES IN THE PROJECTION TO A 2D PLANE
-        # =============
-        
         origin = self.vertices[0]
-        u = geometry_math.normalize(geometry_math.vector(origin, self.vertices[1]))
-        v = geometry_math.vector(origin, self.vertices[2])
-        v = geometry_math.vector_subtraction(v, geometry_math.vector_scalar(u, geometry_math.dot(u,v))) # make it perpendicular to u
-        v = geometry_math.normalize(v) # normalize it 
+        i = 2
+
+        while True:
+            u = geometry_math.normalize(geometry_math.vector(origin, self.vertices[1]))
+            v = geometry_math.vector(origin, self.vertices[i])
+            v = geometry_math.vector_subtraction(v, geometry_math.vector_scalar(u, geometry_math.dot(u,v))) # make it perpendicular to u
+            v = geometry_math.normalize(v)
+
+            if geometry_math.dot(v, v) > 0:
+                break
+            i += 1
+
         for loop in self.loops:
             edges = [] 
 
@@ -147,4 +152,3 @@ class Face:
                     loop_classes.add(j)
 
         return set(range(0,len(self.loops_2d))).difference(loop_classes).pop() # Currently assumes there is only one outer loop. Returns index
-

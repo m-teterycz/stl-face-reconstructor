@@ -3,40 +3,39 @@ class Mesh:
         self.triangles = triangles
         self.faces = []
         self.vertices = self.get_vertices()
-    
-    def find_neighbours(self):
-        for i in range(len(self.triangles)):
-            for j in range(i + 1, len(self.triangles)):
-                if self.check_connected(self.triangles[i], self.triangles[j]):
-                    self.triangles[i].neighbours.append(self.triangles[j])
-                    self.triangles[j].neighbours.append(self.triangles[i])
 
-            
-    def check_connected(self, triangle1, triangle2):
-        connected_vertices = 0
-        for vertex in triangle1.vertices:
-            for j in range(3):
-                if vertex == triangle2.vertices[j]:
-                    connected_vertices += 1
-        if connected_vertices == 2:
-            return True
-        return False
+    def find_neighbours(self):
+        vertex_to_triangles = {}
+        for triangle in self.triangles:
+            for edge in triangle.edges:
+                vertex_to_triangles.setdefault(frozenset(edge), []).append(triangle) # frozen set used so that (a,b) == (b,a) is true
+
+        for value in vertex_to_triangles.values():
+            if len(value) == 2:
+                for i in range(0,2):
+                    for j in range(i + 1,2):
+                        value[i].neighbours.append(value[j])
+                        value[j].neighbours.append(value[i])
+            else:
+                raise Exception("Non-manifold edge detected / STL input is invalid. ")
+
 
     def find_all_planar_regions(self):
-        visited = []
+        visited = set()
         regions = []
 
         for triangle in self.triangles:
             if triangle not in visited:
                 region = self.dfs(triangle)
                 regions.append(region)
-                visited.extend(region)
+                for triangle1 in region:
+                    visited.add(triangle1)
 
         return regions
     
     def dfs(self, triangle):
         normal = triangle.normal
-        visited = []
+        visited = set()
         planarfaces = []
         stack = [triangle]
 
@@ -46,7 +45,7 @@ class Mesh:
             if current in visited:
                 continue
 
-            visited.append(current)
+            visited.add(current)
             planarfaces.append(current)
 
             for neighbour in current.neighbours:
@@ -57,8 +56,10 @@ class Mesh:
 
     def get_vertices(self):
         vertices = []
+        seen = set()
         for triangle in self.triangles:
             for vertex in triangle.vertices:
-                if vertex not in vertices:
+                if vertex not in seen:
                     vertices.append(vertex)
+                    seen.add(vertex)
         return tuple(vertices)

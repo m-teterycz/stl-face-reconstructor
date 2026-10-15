@@ -1,11 +1,13 @@
-import geometry_math
+from core import geometry_math
 class StepWriter:
-    def __init__(self, mesh, measurments, name, description):
-        self.name = "YourName"
+    def __init__(self, mesh, prefix, unit, name, description):
+        self.name = name
         self.application_name = "AppName"
         self.application = "YourApplication"
         self.file_name = "FileName"
-        self.file_desc = "Description"
+        self.description = description
+        self.prefix = prefix
+        self.unit = unit
         self.faces = mesh.faces
         self.triangles = mesh.triangles
         self.current_id = 0
@@ -31,10 +33,6 @@ class StepWriter:
         self.manifoldsolidbrep = {}
         self.facebound_registry = {}
         self.advancedface_registry = {}
-
-        self.measurments = measurments
-        self.name = name
-        self.description = description
 
     def build_product_structure(self):
         global ProductDefShape
@@ -65,7 +63,7 @@ class StepWriter:
 
 
     def build_representation_structure(self):
-        LengthUnit1 = LengthUnit("MILLI", "METRE")
+        LengthUnit1 = LengthUnit(self.prefix, self.unit)
         self.register(LengthUnit1)
 
         PlaneAngleUnit1 = PlaneAngleUnit()
@@ -89,7 +87,7 @@ class StepWriter:
 
     def write_data(self, f):
         f.write('ISO-10303-21;\nHEADER;\n\n')
-        f.write(f"FILE_DESCRIPTION(('{self.file_desc}'),'2;1');\nFILE_NAME('{self.file_name}','2026-08-16T09:00:00',('{self.name}'),('{self.application}'),'','','');\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\n\n")
+        f.write(f"FILE_DESCRIPTION(('{self.description}'),'2;1');\nFILE_NAME('{self.file_name}','2026-08-16T09:00:00',('{self.name}'),('{self.application}'),'','','');\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\n\n")
         f.write("ENDSEC;\n\n")
         f.write("DATA;\n\n")
 

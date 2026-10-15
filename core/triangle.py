@@ -1,4 +1,4 @@
-import geometry_math
+from core import geometry_math
 
 class Triangle:
     def __init__(self, vertices):

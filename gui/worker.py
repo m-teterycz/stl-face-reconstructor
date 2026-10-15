@@ -1,0 +1,130 @@
+from core import stl_reader
+from core.mesh import Mesh
+from core import triangle
+from core.step_writer import StepWriter
+from core.face import Face
+from core.step_writer import (CartesianPoint,Direction,VertexPoint,Line,Vector,EdgeCurve,OrientedEdge,EdgeLoop,FaceOuterBound,AXIS2_PLACEMENT_3D,Normal,Plane,AdvancedFace,ClosedShell,ManifoldSolidBrep,FaceBound,)
+
+from core import geometry_math
+import time
+
+def stl_to_step(directory, file_name, prefix, units):
+    data = stl_reader.read_data(directory + f"\\{file_name}.stl")
+    triangles = triangle.create_triangles(data)
+
+    mesh = Mesh(triangles) # 10 seconds
+    mesh.find_neighbours()
+
+    co_planar_groups = mesh.find_all_planar_regions()
+
+    for i in range(len(co_planar_groups)):
+        face = Face(co_planar_groups[i])
+        mesh.faces.append(face)
+
+    stepwriter = StepWriter(mesh, prefix, units, file_name, 'desc')
+
+    for vertex in mesh.vertices: # Register all unique vertices in the mesh to the step file
+        Cartesian_Point = CartesianPoint(vertex)
+        stepwriter.register(Cartesian_Point) # Generates an id
+        stepwriter.cartesian_registry[vertex] = Cartesian_Point.id
+        stepwriter.cartesian_registry_i[Cartesian_Point.id] = vertex
+
+        Vertex_Point = VertexPoint(f"#{Cartesian_Point.id}")
+        stepwriter.register(Vertex_Point)
+        stepwriter.vertex_registry[vertex] = Vertex_Point.id
+
+    Advanced_Faces = []
+
+    for face in mesh.faces:
+        Edge_Loop_Ids = []
+        Normal1 = Normal(face.normal)
+        stepwriter.register(Normal1)
+        stepwriter.normal_registry[Normal1.normal] = Normal1.id
+
+        for loop in face.loops:
+            OrientedEdges = []
+
+            for edge in loop:
+                magnitude = geometry_math.magnitude(geometry_math.vector(edge[0], edge[1]))
+                data = frozenset(edge)
+                if data not in stepwriter.direction_registry:
+                    Direction1 = Direction(edge)
+                    stepwriter.register(Direction1)
+                    stepwriter.direction_registry[data] = Direction1.id
+                    stepwriter.direction_registry_i[Direction1.id] = data
+
+                    Vector1 = Vector(Direction1.id, magnitude)
+                    stepwriter.register(Vector1)
+                    stepwriter.vector_registry[data] = Vector1.id
+
+                    Line1 = Line(f"#{stepwriter.cartesian_registry[edge[0]]}", f"#{stepwriter.current_id}")
+                    stepwriter.register(Line1)
+                    stepwriter.line_registry[data] = Line1.id
+
+                data = frozenset((stepwriter.vertex_registry[edge[0]], stepwriter.vertex_registry[edge[1]]))
+                
+                if data not in stepwriter.edgecurve_registry:
+                    EdgeCurve1 = EdgeCurve(stepwriter.vertex_registry[edge[0]], stepwriter.vertex_registry[edge[1]], Line1.id)
+                    stepwriter.register(EdgeCurve1)
+                    stepwriter.edgecurve_registry[data] = EdgeCurve1.id
+                    stepwriter.edgecurve_direction[data] = (edge[0], edge[1])
+                    stepwriter.edgecurve_registry_i[EdgeCurve1.id] = data
+
+
+                EdgeCurveid = stepwriter.edgecurve_registry[data]
+                original_edge = stepwriter.edgecurve_direction[data]
+
+                if original_edge == (edge[0], edge[1]):
+                    ending = ".T."
+                else:
+                    ending = ".F."
+                OrientedEdge1 = OrientedEdge(EdgeCurveid, ending)
+                stepwriter.register(OrientedEdge1)
+                stepwriter.orientededge_registry[OrientedEdge1] = OrientedEdge1.id 
+
+                OrientedEdges.append(OrientedEdge1.id)     
+
+            EdgeLoop1 =  EdgeLoop(OrientedEdges)
+            stepwriter.register(EdgeLoop1)
+            stepwriter.edgeloop_registry[EdgeLoop1] = EdgeLoop1.id
+            Edge_Loop_Ids.append(EdgeLoop1.id)
+
+        boundary_ids = []
+
+        for loop_index, edge_loop_id in enumerate(Edge_Loop_Ids):
+            if loop_index == face.outer_loop:
+                boundary = FaceOuterBound(edge_loop_id)
+                stepwriter.faceouterbound_registry[boundary] = boundary.id
+            else:
+                boundary = FaceBound(edge_loop_id)
+                stepwriter.facebound_registry[boundary] = boundary.id
+
+            stepwriter.register(boundary)
+            boundary_ids.append(boundary.id)
+
+        
+
+
+        Axis2_Placement_3D = AXIS2_PLACEMENT_3D(stepwriter.cartesian_registry[face.vertices[0]], stepwriter.normal_registry[face.normal], stepwriter.direction_registry[frozenset(face.edges[0])])
+        stepwriter.register(Axis2_Placement_3D)
+        stepwriter.Axis2_Placement_3D_registry[Axis2_Placement_3D] = Axis2_Placement_3D.id
+
+        Plane1 = Plane(Axis2_Placement_3D.id)
+        stepwriter.register(Plane1)
+        stepwriter.plane_registry[Plane1] = Plane1.id
+
+        AdvancedFace1 = AdvancedFace(boundary_ids, Plane1.id)
+        stepwriter.register(AdvancedFace1)
+        stepwriter.advancedface_registry[AdvancedFace1] = AdvancedFace1.id
+        Advanced_Faces.append(AdvancedFace1.id)
+
+    ClosedShell1 = ClosedShell(Advanced_Faces)
+    stepwriter.register(ClosedShell1)
+
+    ManifoldSolidBrep1 = ManifoldSolidBrep("cube", ClosedShell1.id)
+    stepwriter.register(ManifoldSolidBrep1)
+    stepwriter.manifoldsolidbrep[ManifoldSolidBrep1] = ManifoldSolidBrep1.id
+
+    stepwriter.write_data(open("OUTPUT.step", "w"))
+
+    print("STL successfully converted! Check Output file for the output.")

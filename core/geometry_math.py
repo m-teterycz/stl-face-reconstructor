@@ -31,7 +31,7 @@ def normalize(vector):
     return [x, y, z]
 
 def magnitude(v):
-     return (v[0] ** 2 + v[1] ** 2 + v[2] ** 2) ** 0.5
+     return math.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2)
 
 def dot(v1, v2):
      x = v1[0] * v2[0]

@@ -7,13 +7,12 @@ def stl_type(data):
 
 def read_data(path):
     with open(path, "r") as f:
-        if 'vertex' in f.read():
+        try:
             return format_data_ascii(path)
-        else:
+        except:
             return format_data_binary(path)
 
 def format_data_ascii(path):
-    
     f = open(path, 'r')
     data = f.read()
     words = data.split()
