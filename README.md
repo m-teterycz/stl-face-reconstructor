@@ -20,7 +20,6 @@ Rather than relying on existing CAD libraries, the project aims to implement the
 * STEP export (mostly works for regular geometry with no curves etc. There might be edge cases.)
 ## Planned Features
 
-* Optional GUI
 * Rounding values in actual STL files to prevent co-planar detection from failing
 
 ## Why This Project?
