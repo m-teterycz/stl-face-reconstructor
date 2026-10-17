@@ -1,4 +1,4 @@
-# STL Face Reconstructor
+# STL to STEP Converter
 
 Experimental Python implementation of ASCII and binary STL parsing with planar face reconstruction for STEP conversion.
 
